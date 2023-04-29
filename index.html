@@ -33,10 +33,12 @@
 <div class="modal fade" id="addNewModal" tabindex="-1" aria-labelledby="addNewModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
+
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="addNewModalLabel">Add New Task Here..</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
       <div class="modal-body">
         <form onsubmit="return false">
           <!-- image -->
@@ -111,11 +113,14 @@
               </li>
             </ul>
             <button class="btn btn-primary d-flex align-items-center gap-2" type="submit" data-bs-toggle="modal" data-bs-target="#addNewModal">
+              <!-- target h iska addNewModal vo upar add new modal mai h isliye vo khul pata h  -->
               <i class="fa-light fa-plus mr-2"></i>Add New Item
             </button>    
           </div>
         </div>
 </nav>
+
+
 
 <div class="container">
   <!-- search window section -->
@@ -123,7 +128,8 @@
       <div class="row justify-content-center">
         <div class="col-md-6 col-sm-12">
           <div class="input-group flex-nowrap shadow-lg rounded">
-            <input type="search" class="form-control" placeholder="Search Your Task Here...." aria-label="Search task" aria-describedby="addon-wrapping"/>
+            <input type="search" class="form-control" placeholder="Search Your Task Here...." aria-label="Search task" 
+            aria-describedby="addon-wrapping" oninput="searchTask.apply(this , arguments)" />
             <span class="input-group-text" id="addon-wrapping">
               <i class="fas fa-search"></i>
             </span>

@@ -63,6 +63,7 @@
 const state = {
     tasklist : [],
 };
+// backup Storage
 
 // THIS IS OUR BACKUP STORAGE , FIRST STORAGE IS LOCAL BROWSER
 // state.Tasklist , is how we can access it
@@ -72,6 +73,7 @@ const state = {
 // DOM operations
 const taskContents= document.querySelector(".task__contents");
 // this is for the card displayed on UI
+// jo card bnaya h vo screen pe rakhne k liye 
 
 const taskModal= document.querySelector(".task__modal__body");
 // this is when we need to display that card content on click of OPEN TASK
@@ -96,10 +98,7 @@ const htmlTaskContent = ({id , title , description , type , url}) =>
 // name element is used to reference an object in javascript
 // ab hum name id bar baar likh rahe h grouping k liye cause bahut cards h
 
-
 `    
- 
-
 <div class="col-md-6 col-lg-4 mt-3 " id=${id} key=${id}> 
     
 
@@ -107,21 +106,22 @@ const htmlTaskContent = ({id , title , description , type , url}) =>
     
 
         <div class = "card-header d-flex justify-content-end task__card__header">
-            <button type="button" class="btn btn-outline-info mr-1.5" name=${id}>
+            <button type="button" class="btn btn-outline-info mr-1.5" onclick="editTask.apply(this , arguments)" name=${id}>
                 
                 <i class="fas fa-pencil-alt name=${id}"></i>
                  
             </button>
 
-            <button  type="button" class="btn btn-outline-danger mr-1.5" name=${id}>
+            <button  type="button" class="btn btn-outline-danger mr-1.5" onclick="deleteTask.apply(this , arguments)" name=${id} >
                 <i class="fas fa-trash name=${id}"></i>
             </button>
         </div>
 
 
         <div class= "card-body">
-            ${url &&
-               ` <img width ="100%" src=${url} alt = "card image" class="card-img-top md-3 rounded-lg" />   `
+            ${url 
+               ?` <img width ="100%" src=${url} alt = "card image" class="card-img-top md-3 rounded-lg" />   `
+               :` <img width ="100%" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThyEKIq_a7eWEwVEoo1aTBQ6gV1KQ4BI8ojEQgnl0ITQ&s" alt = "card image" class="card-img-top md-3 rounded-lg" />   `
             }
 
             <h4 class="card-title  task__card__title">${title}</h4>
@@ -129,13 +129,13 @@ const htmlTaskContent = ({id , title , description , type , url}) =>
             <p class='description trim-3-lines text-muted'>${description}</p>
 
             <div class='tags text-white d-flex flex-wrap'>
-             <span> class='badge bg-primary m-1'${type}</span>
+             <span class='badge bg-primary m-1'>${type}</span>
            </div>
         </div>
 
 
         <div class="card-footer">
-            <button type="button" class="btn btn-outline-primary float-right" data-bs-toggle="modal" data-bs-target="#showTask">Open Task
+            <button type="button" class="btn btn-outline-primary float-right" data-bs-toggle="modal" data-bs-target="#showTask" onclick="openTask.apply(this , arguments)" id=${id}>Open Task
             </button>
         </div>
 
@@ -156,9 +156,10 @@ const htmlmodalContent = ({id  , title  , description , url}) => {
     return `
     
     <div id=${id}>
-        ${url &&
-            `<img width='100%' src=${url} alt='Card Image' class='img-fluid place__holder__image mb-3' />`
-            //    ` <img width ="100%" src=${url} alt = "card image" class="img-fluid place_holder_image mb-3"></img>   `
+        ${url 
+            ?`<img width='100%' src=${url} alt='Card Image' class='img-fluid place__holder__image mb-3' />`
+            :` <img width ="100%" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThyEKIq_a7eWEwVEoo1aTBQ6gV1KQ4BI8ojEQgnl0ITQ&s" alt = "card image" class="card-img-top md-3 rounded-lg" />   `
+            
         }
 
         <strong class="text-muted text-sm">Created on : ${date.toDateString()}</strong>
@@ -281,10 +282,10 @@ const handleSubmit = (event) => {
         description: document.getElementById("taskDescription").value,
     };
 
-    // if(input.title==="" || input.Tag==="" || input.TaskDes==="")
-    // {
-    //     return alert("Please Fill All The Necessary Details :)");
-    // }
+    if(input.title==="" || input.type==="" || input.description==="")
+    {
+        return alert("Please Fill All The Necessary Details :)");
+    }
 
 // changes get hogye toh ab unko UI pe dikhana bhi h ussi time before vo DOM khatam ho
 
@@ -297,4 +298,230 @@ state.tasklist.push({...input , id});
 // array mai save hogyi ab LOCAL SERVER KI BARI 
 updateLocalStorage();
 
+};
+
+
+
+
+// // open task on click of open task
+const openTask = (event) => {
+    if (!event) event = window.event;
+    // if (!event) event = window.event; ye line bhi akeli chal sakti h aur dusra option opentask() ki jagah opentask(this , arguements)
+    // bhi chal sakta h abhi maine dono chala k dikha diye h ek saath 
+
+    const getTask = state.tasklist.find(({id})=> id === event.target.id);
+    taskModal.innerHTML = htmlmodalContent(getTask);
+}
+
+
+// delete task on click of trash icon
+const deleteTask = (event) => {
+    if (!event) event = window.event;
+    // if (!event) event = window.event; ye line bhi akeli chal sakti h aur dusra option opentask() ki jagah opentask(this , arguements)
+    // bhi chal sakta h abhi maine dono chala k dikha diye h ek saath 
+    
+    const targetId=event.target.getAttribute("name");
+    // console.log(targetId);
+    // whats happening is kabhi icon pe click ho rha h kabhi button pe to maine deletetask dono k click pe daal di h 
+
+    const type = event.target.tagName;
+    // console.log(type); this gives the tag name which we are clicking , its icon or button 
+
+    const removeTask = state.tasklist.filter(({id}) => id != targetId);
+    console.log(removeTask);
+
+    updateLocalStorage();
+
+    if(type === "BUTTON")
+    {
+        // console.log(event.target.parentNode.parentNode.parentNode.parentNode);
+        return event.target.parentNode.parentNode.parentNode.parentNode.removeChild
+        (event.target.parentNode.parentNode.parentNode);
+
+        // button jo h vo 4th child h htmltaskcontent k andar toh usko target leke pura htmlcontent he delete kar rhe h card ka
+    }
+    else if (type === "I")
+    {
+        return event.target.parentNode.parentNode.parentNode.parentNode.parentNode.removeChild(
+            event.target.parentNode.parentNode.parentNode.parentNode);
+        // jo icon h vo button ka child h toh vo 5th child hua toh icon pe click hua toh i have to go 5 steps back
+        // basically 4 nodes pe mai last div pe hounga jismai sara content h 
+        // 5th ka child is that div toh 5th ka removechild mtlb pura card delete
+    }
+}
+
+
+
+// // edit task function
+const editTask = (event) => {
+    if(!event) event = window.event;
+
+    const targetId = event.target.id;
+    const type=event.target.tagName;
+
+    let parentNode;
+    let taskTitle;
+    let taskDescription;
+    let taskType;
+    let submitButton;
+
+    if(type === "BUTTON")
+    {
+        parentNode = event.target.parentNode.parentNode;   
+    }
+    else if (type === "I")
+    {
+        parentNode = event.target.parentNode.parentNode.parentNode;
+    }
+
+    // taskTitle = parentNode.childNodes[3].childNodes;
+    // 3 pe h stored card body toh hum usko call kar rhe h us
+    // arrays stored h odd integers pe mai jab 1 likh rha hu toh card header aa rha h 
+    // console.log(taskTitle);
+
+
+    // NodeList(7) [text, div.card-header.d-flex.justify-content-end.task__card__header, text, div.card-body, text, div.card-footer, text]
+    //     0: text
+    //     1: div.card-header.d-flex.justify-content-end.task__card__header
+    //     2: text
+    //     3: div.card-body
+    //     4: text
+    //     5: div.card-footer
+    //     6: text
+    //     length: 7
+
+    // AB HUME 3 CHAHIYE TO SELECT CARD BODY 
+
+    // 0: text
+    // 1: img.card-img-top.md-3.rounded-lg
+    // 2: text
+    // 3: h4.card-title.task__card__title
+    // 4: text
+    // 5: p.description.trim-3-lines.text-muted
+    // 6: text
+    // 7: div.tags.text-white.d-flex.flex-wrap
+    // 8: text
+    // length: 9
+
+    // AUR CARD BODY K ANDAR SE 3-TASKTITLE , 5-TASKDESCRIPTION AUR 7-TYPE 
+
+
+    taskTitle = parentNode.childNodes[3].childNodes[3];
+    // parent node card h uske array k second pe yani 1 fer 3 pe card_body h 
+    // uss card_body k andar bhi array h uske first pe image jo editable nhi h , 3rd pe title h 
+
+    taskDescription = parentNode.childNodes[3].childNodes[5];
+    // body k 5th yani 3rd k next pe description hua 
+
+    taskType = parentNode.childNodes[3].childNodes[7].childNodes[1];
+    // 7th pe tasktype hua but vo div mai h so uske liye ek child aur
+
+    submitButton = parentNode.childNodes[5].childNodes[1];
+    // footer was on 5 , accessing open task button to change it which was on 1
+
+    // console.log(taskTitle , taskDescription , taskType , submitButton); ye karke dekhoge toh pta chalega ki card ki sari info fetch hogyi h 
+
+    taskTitle.setAttribute("contenteditable","true");
+    taskDescription.setAttribute("contenteditable","true");
+    taskType.setAttribute("contenteditable","true");
+    // setAttribute lets you edit things , basically ab tum ferse set kar sakte ho
+    // ab mai normally click karu toh edit ka cursor aata h but edit nhi hota but 
+    // when i click on pencil toh vo edit ho rha h but save nhi ho rha h uske liye function likhna padega
+
+    submitButton.setAttribute("onclick","saveEdit.apply(this , arguments)");
+    // submitButton mai humne vo openTask wale button ko daal rakha h toh ab hum
+    // SAVE CHANGES PE JAB CLICK KARENGE TOH YE SAVE EDIT CALL HOGA AUR CHANGE HOJAYEGA SAB
+
+    // i want ki open task aa raha h abhi toh vo pencil yani editTask k trigger pe vo change hoke SAVE CHANGES wale button mai convert ho
+    // fer info edit ho rhi h , save ho toh modal open hone ki jagah saveEdit function call ho aur save karle 
+    // fer vapis save change wala button open task mai convert ho aur modal khul jaye
+
+    // data-bs-toggle="modal" data-bs-target="#showTask"
+    submitButton.removeAttribute("data-bs-toggle"); 
+    submitButton.removeAttribute("data-bs-target");
+    // ab open nhi hoga modal on large screen humne vo attribute hata diya pencil k click pe
+    submitButton.innerHTML="Save Changes";
+    // on click of pencil Open Task converts to Save Changes
+
+}
+
+// EDIT TASK FUNCTION
+
+const saveEdit = (event) => {
+     if(!event) event = window.event;
+
+    const targetId = event.target.id;
+    const parentNode = event.target.parentNode.parentNode;
+    // open task button toh footer mai h na toh body k liye 2 he nodes h 
+    // console.log(parentNode); you can check we are in the card body yaha se karenge edit
+
+    const taskTitle = parentNode.childNodes[3].childNodes[3];
+    const taskDescription = parentNode.childNodes[3].childNodes[5];
+    const taskType = parentNode.childNodes[3].childNodes[7].childNodes[1];
+    const submitButton = parentNode.childNodes[5].childNodes[1];
+
+    // ye sab same hoga cause body toh same he h 
+
+    const updateData = {
+        taskTitle : taskTitle.innerHTML,
+        taskDescription : taskDescription.innerHTML ,
+        taskType : taskType.innerHTML ,
+    };
+    // jo data aaggya h card pe update karke vo bs card pe update hua h ab usse har jagah update karna h 
+
+    let stateCopy = state.tasklist;
+
+    stateCopy = stateCopy.map((task) => 
+    task.id === targetId
+    ?{
+        id : task.id , 
+        title : updateData.taskTitle , 
+        description : updateData.taskDescription , 
+        type : updateData.taskType , 
+        url : task.url,
+    }
+    :task 
+    );
+
+    state.tasklist = stateCopy;
+    // humne stateCopy mai array copy kari , statecopy mai naye changes daale fer unko state.tasklist mai bhej diya
+    updateLocalStorage();
+    // local storage as well as array got updated
+
+
+    taskTitle.setAttribute("contenteditable","false");
+    taskDescription.setAttribute("contenteditable","false");
+    taskType.setAttribute("contenteditable","false");
+    // edit hoke save hogya ab editable nhi hoga content
+
+    submitButton.setAttribute("onclick","openTask.apply(this , arguments)");
+    // data-bs-toggle="modal" data-bs-target="#showTask"
+    submitButton.setAttribute("data-bs-toggle" , "modal"); 
+    submitButton.setAttribute("data-bs-target" , "#showTask");
+    // ab open nhi hoga modal on large screen humne vo attribute hata diya pencil k click pe
+    submitButton.innerHTML="Open Task";
+};
+
+
+
+// SEARCH BAR
+const searchTask = (event) => {
+    if(!event) event = window.event;
+
+    while(taskContents.firstChild)
+    {
+        taskContents.removeChild(taskContents.firstChild);
+    }
+
+    const resultData = state.tasklist.filter(({title}) => 
+        title.toLowerCase().includes(event.target.value.toLowerCase())
+    );
+
+    console.log(resultData);
+
+    resultData.map((cardData) => {
+        // taskContents.insertAdjacentHTML("beforeend" , htmlmodalContent(cardData));
+        // for smaller card size 
+        taskContents.insertAdjacentHTML("beforeend" , htmlTaskContent(cardData));
+    });
 };
